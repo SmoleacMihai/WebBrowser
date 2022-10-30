@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,6 +17,8 @@ namespace WebBrowser
         public Form1()
         {
             InitializeComponent();
+            richTextBox1.Text = File.ReadAllText("history.txt");
+            listBox2.Items.AddRange(File.ReadAllLines("savePages.txt")) ;
         }
 
         private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
@@ -31,72 +35,58 @@ namespace WebBrowser
             int index = listBox1.SelectedIndex;
             try
             {
-                Uri uri = new Uri("https://" + listBox1.Items[index].ToString() + ".com");
-                textBox1.Text = "";
-                webBrowser1.Navigate(uri);
+                Uri uri = new Uri(listBox1.Items[index].ToString());
+                webBrowser.Navigate(uri);
             }
             catch (Exception)
             {
                 Uri uri = new Uri("https://google.com");
-                textBox1.Text = "";
-                webBrowser1.Navigate(uri);
+                webBrowser.Navigate(uri);
             }
-        }
-
-        private void listBox3_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            int index = listBox1.SelectedIndex;
-            string pageName = textBox1.Text;
-            try
+            if(textBox1.Text.Contains("https://") || textBox1.Text.Contains("http://"))
             {
-                Uri uri = new Uri(pageName);
-                webBrowser1.Navigate(uri);
-
-                listBox1.Items[listBox1.SelectedIndex] = pageName;
+                int index = listBox1.SelectedIndex;
+                string pageName = textBox1.Text;
+                try
+                {
+                    Uri uri = new Uri(pageName);
+                    webBrowser.Navigate(uri);
+                    listBox1.Items[listBox1.SelectedIndex] = pageName;
+                }
+                catch (Exception)
+                {
+                    Uri uri = new Uri("https://google.com");
+                    webBrowser.Navigate(uri);
+                    MessageBox.Show("Incorect name");
+                }
+                File.AppendAllText("history.txt", textBox1.Text + "\n");
+                richTextBox1.Text = File.ReadAllText("history.txt");
             }
-            catch (Exception)
+            else
             {
                 try
                 {
-                    Uri uri = new Uri(pageName); 
-                    webBrowser1.Navigate(uri);
+                    int index = listBox1.SelectedIndex;
+                    string pageName = textBox1.Text;
+
+                    Uri uri = new Uri("https://google.com/search?q=" + textBox1.Text);
                     listBox1.Items[listBox1.SelectedIndex] = pageName;
-                }
+                    webBrowser.Navigate(uri);
+                } 
                 catch
                 {
-                    Uri uri = new Uri("https://" + pageName + ".com");
-                    webBrowser1.Navigate(uri);
-                    if(listBox1.SelectedIndex == -1)
-                    {
-                        listBox1.Items.Add(pageName);
-                        
-                    }
-                    else
-                    {
-                        listBox1.Items[listBox1.SelectedIndex] = pageName;
-                    }
-                    
+                    Uri uri = new Uri("https://google.com/search?q=" + textBox1.Text);
+                    listBox1.Items.Add(textBox1.Text);
+                    webBrowser.Navigate(uri);
                 }
-                
-            }
-        }
+                File.AppendAllText("history.txt", textBox1.Text + "\n");
+                richTextBox1.Text = File.ReadAllText("history.txt");
 
-        private void navigateToPageName ()
-        {
-            string pageName = textBox1.Text;
-            Uri uri = new Uri(pageName);
-            webBrowser1.Navigate(uri);
-            listBox1.Items[listBox1.SelectedIndex] = pageName;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -112,6 +102,37 @@ namespace WebBrowser
         private void button2_Click(object sender, EventArgs e)
         {
             webBrowser.GoForward();
+        }
+
+        private void addToFavoritesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            File.AppendAllText("savePages.txt", listBox1.Items[listBox1.SelectedIndex].ToString() + "\n");
+            listBox2.Items.Add(listBox1.Items[listBox1.SelectedIndex].ToString());
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listBox1.Items.RemoveAt(listBox1.SelectedIndex);
+        }
+
+        private void deleteToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            listBox2.Items.RemoveAt(listBox2.SelectedIndex);
+        }
+
+        private void webBrowser_DocumentCompleted_1(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+      
+        }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
