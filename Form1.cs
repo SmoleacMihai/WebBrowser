@@ -33,15 +33,34 @@ namespace WebBrowser
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             int index = listBox1.SelectedIndex;
-            try
+
+            if (listBox1.Items[index].ToString().Contains("https://") || listBox1.Items[index].ToString().Contains("http://"))
             {
-                Uri uri = new Uri(listBox1.Items[index].ToString());
-                webBrowser.Navigate(uri);
+                try
+                {
+                    Uri uri = new Uri(listBox1.Items[index].ToString());
+                    webBrowser.Navigate(uri);
+                }
+                catch (Exception)
+                {
+                    Uri uri = new Uri("https://google.com");
+                    webBrowser.Navigate(uri);
+
+                }
             }
-            catch (Exception)
+            else
             {
-                Uri uri = new Uri("https://google.com");
-                webBrowser.Navigate(uri);
+                try
+                {
+                    Uri uri = new Uri("https://google.com/search?q=" + listBox1.Items[index].ToString());
+                    webBrowser.Navigate(uri);
+                }
+                catch
+                {
+                    Uri uri = new Uri("https://google.com/search?q=" + listBox1.Items[index].ToString());
+                    webBrowser.Navigate(uri);
+                }
+
             }
         }
 
@@ -55,13 +74,13 @@ namespace WebBrowser
                 {
                     Uri uri = new Uri(pageName);
                     webBrowser.Navigate(uri);
-                    listBox1.Items[listBox1.SelectedIndex] = pageName;
+                    listBox1.Items[index] = pageName;
                 }
                 catch (Exception)
                 {
                     Uri uri = new Uri("https://google.com");
                     webBrowser.Navigate(uri);
-                    MessageBox.Show("Incorect name");
+                    MessageBox.Show("pain");
                 }
                 File.AppendAllText("history.txt", textBox1.Text + "\n");
                 richTextBox1.Text = File.ReadAllText("history.txt");
@@ -85,8 +104,8 @@ namespace WebBrowser
                 }
                 File.AppendAllText("history.txt", textBox1.Text + "\n");
                 richTextBox1.Text = File.ReadAllText("history.txt");
-
             }
+            textBox1.Text = "";
         }
 
         private void button1_Click(object sender, EventArgs e)
